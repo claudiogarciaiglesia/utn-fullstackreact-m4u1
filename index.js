@@ -34,12 +34,12 @@ app.post('/clientes', async (req, res) => {
             throw new Error('El nombre debe tener mas de 3 caracteres');
         };
 
-        let query = `INSERT INTO clientes (nombre) VALUES ("${req.body.nombre}")`;
-        let queryRes = await qy(query);
+        let query = 'INSERT INTO clientes (nombre) VALUES (?)';
+        let queryRes = await qy(query, [req.body.nombre]);
 
         let newId = queryRes.insertId;
-        query = `SELECT * FROM clientes WHERE id = "${newId}"`;
-        queryRes = await qy(query);
+        query = 'SELECT * FROM clientes WHERE id = ?';
+        queryRes = await qy(query, [newId]);
 
         res.status(201);
         res.send(queryRes[0]);
@@ -61,19 +61,19 @@ app.post('/trabajos', async (req, res) => {
             throw new Error('No se envio el ID del cliente asociado');
         };
 
-        let query = `SELECT * FROM clientes WHERE id = "${req.body.id_clientes}"`;
-        let queryRes = await qy(query);
+        let query = 'SELECT * FROM clientes WHERE id = ?';
+        let queryRes = await qy(query, [req.body.id_clientes]);
 
         if (queryRes.length === 0) {
             throw new Error('No se encontro el ID del cliente asociado')
         };
 
-        query = `INSERT INTO trabajos (descripcion, id_clientes) VALUES ("${req.body.descripcion}", "${req.body.id_clientes}")`;
-        queryRes = await qy(query);
+        query = 'INSERT INTO trabajos (descripcion, id_clientes) VALUES ( ?, ? )';
+        queryRes = await qy(query, [req.body.descripcion, req.body.id_clientes]);
 
         let newId = queryRes.insertId;
-        query = `SELECT * FROM trabajos WHERE id = "${newId}"`;
-        queryRes = await qy(query);
+        query = 'SELECT * FROM trabajos WHERE id = ?';
+        queryRes = await qy(query, [newId]);
 
         res.status(201);
         res.send(queryRes[0]);
@@ -119,28 +119,14 @@ app.get('/trabajos', async (req, res) => {
 app.get('/trabajos/:id_clientes?/:finalizado?/:pagado?', async (req, res) => {
     try {
 
-        console.log(req.params);
-
         let { id_clientes, finalizado, pagado } = req.params;
 
-        id_clientes = `"${id_clientes}"`;
-        finalizado = !!finalizado && `"${finalizado}"`;
-        pagado = !!pagado && `"${pagado}"`;
-
-
-        console.log(id_clientes + finalizado + pagado);
-
-        const conditions = `id_clientes = ${id_clientes} ${!!finalizado ? " AND finalizado = " + finalizado : ""} ${!!pagado ? " AND pagado = " + pagado : ""} `;
-
-        // const columns = `id_clientes${ !!finalizado && ', finalizado' } ${ !!pagado && ', pagado' } `;
-        // const values = ``;
+        const conditions = `id_clientes = ?${!!finalizado ? " AND finalizado = " + "?" : ""}${!!pagado ? " AND pagado = " + "?" : ""} `;
 
         let query = `SELECT * FROM trabajos WHERE ${conditions} `;
-        let queryRes = await qy(query);
+        let queryRes = await qy(query, [id_clientes, finalizado, pagado]);
 
-        console.log(query);
         res.send(queryRes);
-        // res.send('ok test' + id_clientes + finalizado + pagado);
 
     } catch (e) {
         console.log(e.message);
@@ -156,11 +142,11 @@ app.put('/clientes/:id', async (req, res) => {
             throw new Error('No se envio el nombre');
         };
 
-        let query = `UPDATE clientes SET nombre = "${req.body.nombre}" WHERE id = "${req.params.id}"`;
-        let queryRes = await qy(query);
+        let query = 'UPDATE clientes SET nombre = ? WHERE id = ?';
+        let queryRes = await qy(query, [req.body.nombre, req.params.id]);
 
-        query = `SELECT * FROM clientes WHERE id = "${req.params.id}"`;
-        queryRes = await qy(query);
+        query = 'SELECT * FROM clientes WHERE id = ?';
+        queryRes = await qy(query, [req.params.id]);
 
         res.send(queryRes[0]);
 
@@ -179,11 +165,11 @@ app.put('/trabajos/:id/descripcion', async (req, res) => {
             throw new Error('No se envio la descripcion');
         };
 
-        let query = `UPDATE trabajos SET descripcion = "${req.body.descripcion}" WHERE id = "${req.params.id}"`;
-        let queryRes = await qy(query);
+        let query = 'UPDATE trabajos SET descripcion = ? WHERE id = ?';
+        let queryRes = await qy(query, [req.body.descripcion, req.params.id]);
 
-        query = `SELECT * FROM trabajos WHERE id = "${req.params.id}"`;
-        queryRes = await qy(query);
+        query = 'SELECT * FROM trabajos WHERE id = ?';
+        queryRes = await qy(query, [req.params.id]);
 
         res.send(queryRes[0]);
 
@@ -237,7 +223,7 @@ app.put('/trabajos/:id/pagado', async (req, res) => {
     }
 });
 
-// DELETE para borrar clientes 
+// DELETE para borrar clientes (tambien borra trabajos asociados)
 app.delete('/clientes/:id', async (req, res) => {
     try {
 
