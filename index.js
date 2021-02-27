@@ -187,11 +187,11 @@ app.put('/trabajos/:id/finalizado', async (req, res) => {
             throw new Error('El estado de finalizacion debe ser 0 o 1');
         };
 
-        let query = `UPDATE trabajos SET finalizado = "${req.body.finalizado}" WHERE id = "${req.params.id}"`;
-        let queryRes = await qy(query);
+        let query = 'UPDATE trabajos SET finalizado = ? WHERE id = ?';
+        let queryRes = await qy(query, [req.body.finalizado, req.params.id]);
 
-        query = `SELECT * FROM trabajos WHERE id = "${req.params.id}"`;
-        queryRes = await qy(query);
+        query = 'SELECT * FROM trabajos WHERE id = ?';
+        queryRes = await qy(query, [req.params.id]);
 
         res.send(queryRes[0]);
 
@@ -209,11 +209,11 @@ app.put('/trabajos/:id/pagado', async (req, res) => {
             throw new Error('El estado de finalizacion debe ser 0 o 1');
         };
 
-        let query = `UPDATE trabajos SET pagado = "${req.body.pagado}" WHERE id = "${req.params.id}"`;
-        let queryRes = await qy(query);
+        let query = 'UPDATE trabajos SET pagado = ? WHERE id = ?';
+        let queryRes = await qy(query, [req.body.pagado, req.params.id]);
 
-        query = `SELECT * FROM trabajos WHERE id = "${req.params.id}"`;
-        queryRes = await qy(query);
+        query = 'SELECT * FROM trabajos WHERE id = ?';
+        queryRes = await qy(query, [req.params.id]);
 
         res.send(queryRes[0]);
 
@@ -227,11 +227,11 @@ app.put('/trabajos/:id/pagado', async (req, res) => {
 app.delete('/clientes/:id', async (req, res) => {
     try {
 
-        let query = `DELETE FROM trabajos WHERE id_clientes = "${req.params.id}"`;
-        let queryRes = await qy(query);
+        let query = 'DELETE FROM trabajos WHERE id_clientes = ?';
+        let queryRes = await qy(query, [req.params.id]);
 
-        query = `DELETE FROM clientes WHERE id = "${req.params.id}"`;
-        queryRes = await qy(query);
+        query = 'DELETE FROM clientes WHERE id = ?';
+        queryRes = await qy(query, [req.params.id]);
 
         res.status(204);
         res.send();
@@ -249,8 +249,8 @@ app.delete('/clientes/:id', async (req, res) => {
 app.delete('/trabajos/:id', async (req, res) => {
     try {
 
-        let query = `DELETE FROM trabajos WHERE id = "${req.params.id}"`;
-        let queryRes = await qy(query);
+        let query = 'DELETE FROM trabajos WHERE id = ?';
+        let queryRes = await qy(query, [req.params.id]);
 
         res.status(204);
         res.send();
